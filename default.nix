@@ -1,12 +1,16 @@
 let
   builder = builtins.toFile "my-builder" ''
-    cat <<EOF > $out
+    mkdir -p $out/bin
+
+    executable=$_/$name
+
+    cat <<EOF > $executable
     #!$builder
     PATH=$PATH
     echo "hello world"
     EOF
 
-    chmod +x $out
+    chmod +x $executable
   '';
 
   pkgs = import <nixpkgs> {};
@@ -20,5 +24,8 @@ in builtins.derivation {
   PATH    = "${pkgs.coreutils}/bin";
 }
 
-# Much better! Everything is nice and pure!
-# Time to install our package (hint: it ain't gonna work 🙃 )
+# Alright! Buildable AND installable!
+# We can now type `hello-world` instead of
+# `echo hello world` just like we always wanted!
+# Ok ok tbh this hello world is pretty sad.
+# Let's spice it up a bit.
