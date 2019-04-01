@@ -7,7 +7,7 @@ let
     cat <<EOF > $executable
     #!$builder
     PATH=$PATH
-    echo "hello world"
+    echo "hello world" | figlet | lolcat
     EOF
 
     chmod +x $executable
@@ -21,11 +21,9 @@ in builtins.derivation {
   builder = "${pkgs.bash}/bin/bash";
   args    = [ builder ];
 
-  PATH    = "${pkgs.coreutils}/bin";
+  PATH    = with pkgs; "${coreutils}/bin:${figlet}/bin:${lolcat}/bin";
 }
 
-# Alright! Buildable AND installable!
-# We can now type `hello-world` instead of
-# `echo hello world` just like we always wanted!
-# Ok ok tbh this hello world is pretty sad.
-# Let's spice it up a bit.
+# Much better! Pretty isn't it?
+# Too bad we can't say that about this expression...
+# Let's see if we can do something about that...
