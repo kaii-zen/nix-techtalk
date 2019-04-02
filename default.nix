@@ -2,8 +2,7 @@ let
   pkgs = import <nixpkgs> {};
 
 in pkgs.stdenv.mkDerivation {
-  name        = "hello-world";
-  buildInputs = with pkgs; [ figlet lolcat ];
+  name = "hello-world";
 
   buildCommand = ''
     mkdir -p $out/bin
@@ -12,7 +11,7 @@ in pkgs.stdenv.mkDerivation {
 
     cat <<EOF > $executable
     #!${pkgs.stdenv.shell}
-    PATH=$PATH
+    PATH=${with pkgs; lib.makeBinPath [ coreutils figlet lolcat ]}
     echo "hello world" | figlet | lolcat
     EOF
 
@@ -20,13 +19,6 @@ in pkgs.stdenv.mkDerivation {
   '';
 }
 
-# Ok, this is slightly better! We no longer have to explicitly:
-# - call for `coreutils`: stdenv includes it by default
-# - specify the target system
-# - specify bash as the builder (it's the default)
-# - generate a file for bash to execute
-#
-# However! stdenv includes more than just coreutils.
-# So yes, we managed to slim down the expression a bit,
-# but our *closure* got bigger.
-# WTH is a closure you ask? I'm glad you did!
+# So we've touched on closures and and trimmed ours back down.
+# That build command is still a bit... meh.
+# Let's see if we can improve this a bit more.
