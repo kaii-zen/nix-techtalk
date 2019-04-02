@@ -1,29 +1,32 @@
 let
-  builder = builtins.toFile "my-builder" ''
+  pkgs = import <nixpkgs> {};
+
+in pkgs.stdenv.mkDerivation {
+  name        = "hello-world";
+  buildInputs = with pkgs; [ figlet lolcat ];
+
+  buildCommand = ''
     mkdir -p $out/bin
 
     executable=$_/$name
 
     cat <<EOF > $executable
-    #!$builder
+    #!${pkgs.stdenv.shell}
     PATH=$PATH
     echo "hello world" | figlet | lolcat
     EOF
 
     chmod +x $executable
   '';
-
-  pkgs = import <nixpkgs> {};
-
-in builtins.derivation {
-  system  = builtins.currentSystem;
-  name    = "hello-world";
-  builder = "${pkgs.bash}/bin/bash";
-  args    = [ builder ];
-
-  PATH    = with pkgs; "${coreutils}/bin:${figlet}/bin:${lolcat}/bin";
 }
 
-# Much better! Pretty isn't it?
-# Too bad we can't say that about this expression...
-# Let's see if we can do something about that...
+# Ok, this is slightly better! We no longer have to explicitly:
+# - call for `coreutils`: stdenv includes it by default
+# - specify the target system
+# - specify bash as the builder (it's the default)
+# - generate a file for bash to execute
+#
+# However! stdenv includes more than just coreutils.
+# So yes, we managed to slim down the expression a bit,
+# but our *closure* got bigger.
+# WTH is a closure you ask? I'm glad you did!
